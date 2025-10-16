@@ -1,7 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { PostService } from "@/services/api/postService";
 import { cn } from "@/utils/cn";
 import ApperIcon from "@/components/ApperIcon";
