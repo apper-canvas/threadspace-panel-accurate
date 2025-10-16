@@ -19,13 +19,24 @@ export default function PostDetail() {
 const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [commentContent, setCommentContent] = useState('');
+const [commentContent, setCommentContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
+
   useEffect(() => {
     loadPostAndComments();
   }, [id]);
 
+  useEffect(() => {
+    const checkSaved = async () => {
+      if (post) {
+        const saved = await PostService.isSaved(post.id);
+        setIsSaved(saved);
+      }
+    };
+    checkSaved();
+  }, [post]);
   async function loadPostAndComments() {
     try {
       setLoading(true);
@@ -166,21 +177,11 @@ function renderComments() {
     return <Error message={error} onRetry={loadPostAndComments} />;
   }
 
-  if (!post) {
+if (!post) {
     return <Empty title="Post not found" message="This post may have been removed or doesn't exist." />;
   }
-const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
-  const [isSaved, setIsSaved] = useState(false);
 
-  useEffect(() => {
-    const checkSaved = async () => {
-      if (post) {
-        const saved = await PostService.isSaved(post.id);
-        setIsSaved(saved);
-      }
-    };
-    checkSaved();
-  }, [post]);
+  const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
 
   const handleSave = async () => {
     const result = await PostService.toggleSave(post.id);
