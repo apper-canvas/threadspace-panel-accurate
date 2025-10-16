@@ -3,18 +3,25 @@ import { CommunityService } from "@/services/api/communityService";
 
 export class PostService {
   static posts = [...postsData];
+  static comments = [];
 
   static delay = () => new Promise(resolve => setTimeout(resolve, 300));
 
   static async getAll() {
-    await this.delay();
-    return [...this.posts.map(post => ({ ...post }))];
+await this.delay();
+    return [...this.posts.map(post => ({ 
+      ...post,
+      commentCount: this.comments.filter(c => c.postId === post.Id).length 
+    }))];
   }
 
   static async getById(id) {
     await this.delay();
-    const post = this.posts.find(p => p.Id === parseInt(id));
-    return post ? { ...post } : null;
+const post = this.posts.find(p => p.Id === parseInt(id));
+    if (!post) return null;
+    
+    const commentCount = this.comments.filter(c => c.postId === parseInt(id)).length;
+    return { ...post, commentCount };
   }
 
   static async getPopular() {
@@ -30,6 +37,12 @@ export class PostService {
     return [...this.posts]
       .filter(post => post.community.toLowerCase() === communityName.toLowerCase())
       .map(post => ({ ...post }));
+  }
+
+static async addComment(postId, commentId) {
+    await this.delay();
+    this.comments.push({ postId: parseInt(postId), commentId: parseInt(commentId) });
+    return true;
   }
 
   static async create(postData) {
@@ -55,9 +68,9 @@ title: postData.title,
     
     this.posts.unshift(newPost);
     return { ...newPost };
-  }
+}
 
-static async update(id, updateData) {
+  static async update(id, updateData) {
     await this.delay();
     
     const index = this.posts.findIndex(p => p.Id === parseInt(id));

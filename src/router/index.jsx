@@ -8,6 +8,8 @@ const Communities = lazy(() => import("@/components/pages/Communities"));
 const CommunityDetail = lazy(() => import("@/components/pages/CommunityDetail"));
 const UserProfile = lazy(() => import("@/components/pages/UserProfile"));
 const NotFound = lazy(() => import("@/components/pages/NotFound"));
+const PostDetail = lazy(() => import("@/components/pages/PostDetail"));
+
 const mainRoutes = [
   {
     path: "",
@@ -51,6 +53,14 @@ const mainRoutes = [
       ),
     },
 {
+    path: "post/:id",
+    element: (
+      <Suspense fallback={<div>Loading.....</div>}>
+        <PostDetail />
+      </Suspense>
+    ),
+  },
+  {
     path: "*",
     element: (
       <Suspense fallback={<div>Loading.....</div>}>

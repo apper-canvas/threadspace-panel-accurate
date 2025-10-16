@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React from "react";
 import { cn } from "@/utils/cn";
 import ApperIcon from "@/components/ApperIcon";
@@ -8,18 +8,22 @@ import VoteButtons from "@/components/molecules/VoteButtons";
 const PostCard = ({ post, onVote }) => {
   const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
 
+const navigate = useNavigate();
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all duration-200 hover:post-card-hover group">
       <div className="flex gap-4">
-        <VoteButtons
-          score={post.score}
-          userVote={post.userVote}
-          onVote={onVote}
-          postId={post.id}
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <VoteButtons
+            score={post.score}
+            userVote={post.userVote}
+            onVote={onVote}
+            postId={post.id}
+          />
+        </div>
         
-        <div className="flex-1 min-w-0">
-<div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+        <Link to={`/post/${post.Id}`} className="flex-1 min-w-0 cursor-pointer">
+          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
             <span className="bg-gradient-to-r from-primary/10 to-primary/20 text-primary px-2 py-1 rounded-full text-xs font-medium">
               r/{post.community}
             </span>
@@ -33,7 +37,7 @@ const PostCard = ({ post, onVote }) => {
             {post.title}
           </h2>
           
-{post.postType === 'text' && post.content && (
+          {post.postType === 'text' && post.content && (
             <p className="text-gray-700 mb-4 leading-relaxed line-clamp-3">
               {post.content}
             </p>
@@ -47,6 +51,7 @@ const PostCard = ({ post, onVote }) => {
                 className="w-full max-h-96 object-cover cursor-pointer hover:opacity-95 transition-opacity"
                 onClick={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                   window.open(post.imageUrl, '_blank');
                 }}
               />
@@ -58,6 +63,7 @@ const PostCard = ({ post, onVote }) => {
               className="mb-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
+                e.preventDefault();
                 window.open(post.linkUrl, '_blank', 'noopener,noreferrer');
               }}
             >
@@ -79,22 +85,34 @@ const PostCard = ({ post, onVote }) => {
           )}
           
           <div className="flex items-center gap-6 text-sm text-gray-500">
-            <button className="flex items-center gap-2 hover:text-gray-700 transition-colors duration-200 p-1">
+            <div className="flex items-center gap-2">
               <ApperIcon name="MessageCircle" size={16} />
-              <span>{post.commentCount} comments</span>
-            </button>
+              <span>{post.commentCount || 0} comments</span>
+            </div>
             
-            <button className="flex items-center gap-2 hover:text-gray-700 transition-colors duration-200 p-1">
+            <button 
+              className="flex items-center gap-2 hover:text-gray-700 transition-colors duration-200 p-1"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
               <ApperIcon name="Share" size={16} />
               <span>Share</span>
             </button>
             
-            <button className="flex items-center gap-2 hover:text-gray-700 transition-colors duration-200 p-1">
+            <button 
+              className="flex items-center gap-2 hover:text-gray-700 transition-colors duration-200 p-1"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
               <ApperIcon name="Bookmark" size={16} />
               <span>Save</span>
             </button>
           </div>
-        </div>
+        </Link>
       </div>
     </div>
   );
