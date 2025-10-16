@@ -44,9 +44,9 @@ const mainRoutes = [
         <SearchResults />
       </Suspense>
     ),
-  },
+},
   {
-    path: "community/:name",
+    path: "community/:communityName",
     element: (
       <Suspense fallback={<div>Loading.....</div>}>
         <CommunityDetail />
