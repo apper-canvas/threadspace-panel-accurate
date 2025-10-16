@@ -31,7 +31,7 @@ export class CommentService {
       throw new Error('Comment content is required');
     }
 
-    const newComment = {
+const newComment = {
       Id: Math.max(0, ...this.comments.map(c => c.Id)) + 1,
       postId: parseInt(commentData.postId),
       parentId: commentData.parentId ? parseInt(commentData.parentId) : null,

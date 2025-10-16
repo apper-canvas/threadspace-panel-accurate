@@ -16,12 +16,12 @@ export default function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
-  const [comments, setComments] = useState([]);
+const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [commentContent, setCommentContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
+  const [replyingTo, setReplyingTo] = useState(null);
   useEffect(() => {
     loadPostAndComments();
   }, [id]);
@@ -94,7 +94,7 @@ export default function PostDetail() {
     }
   }
 
-  async function handleSubmitComment(e) {
+async function handleSubmitComment(e, parentId = null) {
     e.preventDefault();
     
     if (!commentContent.trim()) {
@@ -106,7 +106,7 @@ export default function PostDetail() {
       setSubmitting(true);
       const newComment = await CommentService.create({
         postId: id,
-        parentId: null,
+        parentId: parentId,
         author: 'currentUser',
         content: commentContent
       });
@@ -116,7 +116,8 @@ export default function PostDetail() {
       setComments(prev => [...prev, newComment]);
       setPost(prev => ({ ...prev, commentCount: (prev.commentCount || 0) + 1 }));
       setCommentContent('');
-      toast.success('Comment added successfully');
+      setReplyingTo(null);
+      toast.success(parentId ? 'Reply added successfully' : 'Comment added successfully');
     } catch (err) {
       toast.error('Failed to add comment');
     } finally {
@@ -124,7 +125,7 @@ export default function PostDetail() {
     }
   }
 
-  function renderComments() {
+function renderComments() {
     const topLevelComments = comments.filter(c => c.parentId === null);
     
     if (topLevelComments.length === 0) {
@@ -136,12 +137,23 @@ export default function PostDetail() {
       );
     }
 
+    function buildNestedReplies(commentId) {
+      return comments.filter(c => c.parentId === commentId);
+    }
+
     return topLevelComments.map(comment => (
       <CommentCard 
         key={comment.Id} 
         comment={comment} 
-        replies={comments.filter(c => c.parentId === comment.Id)}
+        replies={buildNestedReplies(comment.Id)}
+        allComments={comments}
         onVote={handleCommentVote}
+        onReply={(commentId) => setReplyingTo(commentId)}
+        replyingTo={replyingTo}
+        onSubmitReply={handleSubmitComment}
+        commentContent={commentContent}
+        setCommentContent={setCommentContent}
+        submitting={submitting}
       />
     ));
   }
@@ -292,10 +304,13 @@ export default function PostDetail() {
   );
 }
 
-function CommentCard({ comment, replies, onVote, depth = 0 }) {
-  const timeAgo = formatDistanceToNow(new Date(comment.timestamp), { addSuffix: true });
+function CommentCard({ comment, replies, allComments, onVote, onReply, replyingTo, onSubmitReply, commentContent, setCommentContent, submitting, depth = 0 }) {
   const [showReplies, setShowReplies] = useState(true);
+  const timeAgo = formatDistanceToNow(new Date(comment.timestamp), { addSuffix: true });
 
+  function buildNestedReplies(commentId) {
+    return allComments.filter(c => c.parentId === commentId);
+  }
   return (
     <div className={`${depth > 0 ? 'ml-8 pl-4 border-l-2 border-gray-200' : ''}`}>
       <div className="py-3">
@@ -306,7 +321,7 @@ function CommentCard({ comment, replies, onVote, depth = 0 }) {
             size="sm"
           />
           
-          <div className="flex-1 min-w-0">
+<div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
               <span className="font-medium text-gray-900">u/{comment.author}</span>
               <span>•</span>
@@ -318,7 +333,10 @@ function CommentCard({ comment, replies, onVote, depth = 0 }) {
             </p>
             
             <div className="flex items-center gap-4 text-sm text-gray-500">
-              <button className="flex items-center gap-1 hover:text-gray-700 transition-colors">
+              <button 
+                onClick={() => onReply(comment.Id)}
+                className="flex items-center gap-1 hover:text-gray-700 transition-colors"
+              >
                 <ApperIcon name="MessageCircle" size={14} />
                 <span>Reply</span>
               </button>
@@ -330,12 +348,40 @@ function CommentCard({ comment, replies, onVote, depth = 0 }) {
             </div>
           </div>
         </div>
+
+        {replyingTo === comment.Id && (
+          <form onSubmit={(e) => onSubmitReply(e, comment.Id)} className="mt-4 pl-12">
+            <Textarea
+              value={commentContent}
+              onChange={(e) => setCommentContent(e.target.value)}
+              placeholder="Write your reply..."
+              rows={3}
+              className="mb-2"
+            />
+            <div className="flex gap-2">
+              <Button type="submit" disabled={submitting} size="sm">
+                {submitting ? 'Posting...' : 'Reply'}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  onReply(null);
+                  setCommentContent('');
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        )}
         
         {replies && replies.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-4 pl-12 border-l-2 border-gray-200">
             <button
               onClick={() => setShowReplies(!showReplies)}
-              className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1 mb-2"
+              className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1 mb-3"
             >
               <ApperIcon name={showReplies ? "ChevronUp" : "ChevronDown"} size={14} />
               {showReplies ? 'Hide' : 'Show'} {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
@@ -347,8 +393,15 @@ function CommentCard({ comment, replies, onVote, depth = 0 }) {
                   <CommentCard
                     key={reply.Id}
                     comment={reply}
-                    replies={[]}
+                    replies={buildNestedReplies(reply.Id)}
+                    allComments={allComments}
                     onVote={onVote}
+                    onReply={onReply}
+                    replyingTo={replyingTo}
+                    onSubmitReply={onSubmitReply}
+                    commentContent={commentContent}
+                    setCommentContent={setCommentContent}
+                    submitting={submitting}
                     depth={depth + 1}
                   />
                 ))}
