@@ -3,6 +3,42 @@ import communitiesData from "@/services/mockData/communities.json";
 export class CommunityService {
   static communities = [...communitiesData];
 
+  static async search(query) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    if (!query || !query.trim()) {
+      return [];
+    }
+
+    const searchTerm = query.toLowerCase().trim();
+    const results = [];
+
+    for (const community of this.communities) {
+      const nameMatch = community.name.toLowerCase().includes(searchTerm);
+      const descMatch = community.description.toLowerCase().includes(searchTerm);
+      const categoryMatch = community.category.toLowerCase().includes(searchTerm);
+
+      if (nameMatch || descMatch || categoryMatch) {
+        let snippet = '';
+        
+        if (descMatch) {
+          const index = community.description.toLowerCase().indexOf(searchTerm);
+          const start = Math.max(0, index - 40);
+          const end = Math.min(community.description.length, index + searchTerm.length + 40);
+          snippet = community.description.substring(start, end);
+        } else if (categoryMatch) {
+          snippet = `Category: ${community.category}`;
+        }
+
+        results.push({
+          community,
+          snippet: snippet.trim()
+        });
+      }
+    }
+
+    return results;
+  }
   static delay = () => new Promise(resolve => setTimeout(resolve, 250));
 
   static async getAll() {
@@ -57,5 +93,5 @@ export class CommunityService {
     
     this.communities.splice(index, 1);
     return true;
-  }
+}
 }

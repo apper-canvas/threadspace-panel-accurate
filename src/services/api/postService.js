@@ -5,6 +5,52 @@ export class PostService {
   static posts = [...postsData];
   static comments = [];
 
+  static async search(query) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    if (!query || !query.trim()) {
+      return [];
+    }
+
+    const searchTerm = query.toLowerCase().trim();
+    const results = [];
+
+    for (const post of this.posts) {
+      const titleMatch = post.title.toLowerCase().includes(searchTerm);
+      const contentMatch = post.content.toLowerCase().includes(searchTerm);
+      const authorMatch = post.author.toLowerCase().includes(searchTerm);
+      const tagMatch = post.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+
+      if (titleMatch || contentMatch || authorMatch || tagMatch) {
+        let snippet = '';
+        
+        if (titleMatch) {
+          const index = post.title.toLowerCase().indexOf(searchTerm);
+          const start = Math.max(0, index - 30);
+          const end = Math.min(post.title.length, index + searchTerm.length + 30);
+          snippet = post.title.substring(start, end);
+        } else if (contentMatch) {
+          const index = post.content.toLowerCase().indexOf(searchTerm);
+          const start = Math.max(0, index - 40);
+          const end = Math.min(post.content.length, index + searchTerm.length + 40);
+          snippet = post.content.substring(start, end);
+        } else if (tagMatch) {
+          const matchedTag = post.tags.find(tag => tag.toLowerCase().includes(searchTerm));
+          snippet = `Tagged with: ${matchedTag}`;
+        } else if (authorMatch) {
+          snippet = `Posted by u/${post.author}`;
+        }
+
+        results.push({
+          post,
+          snippet: snippet.trim()
+        });
+      }
+    }
+
+    return results;
+  }
+
   static delay = () => new Promise(resolve => setTimeout(resolve, 300));
 
   static async getAll() {
@@ -104,5 +150,5 @@ title: postData.title,
     post.score += scoreDiff;
     
     return { ...post };
-  }
+}
 }

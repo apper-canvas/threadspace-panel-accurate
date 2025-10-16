@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
+const SearchResults = lazy(() => import("@/components/pages/SearchResults"));
 import Layout from "@/components/organisms/Layout";
 
 const Home = lazy(() => import("@/components/pages/Home"));
@@ -18,7 +19,7 @@ const mainRoutes = [
       <Suspense fallback={<div>Loading.....</div>}>
         <Home />
       </Suspense>
-    )
+    ),
   },
   {
     path: "popular",
@@ -26,37 +27,45 @@ const mainRoutes = [
       <Suspense fallback={<div>Loading.....</div>}>
         <Popular />
       </Suspense>
-    )
+    ),
   },
-{
+  {
     path: "communities",
     element: (
       <Suspense fallback={<div>Loading.....</div>}>
         <Communities />
       </Suspense>
-    )
+    ),
   },
   {
-    path: "community/:communityName",
+    path: "search",
+    element: (
+      <Suspense fallback={<div>Loading.....</div>}>
+        <SearchResults />
+      </Suspense>
+    ),
+  },
+  {
+    path: "community/:name",
     element: (
       <Suspense fallback={<div>Loading.....</div>}>
         <CommunityDetail />
       </Suspense>
-    )
+    ),
   },
-    {
-      path: "user/:username",
-      element: (
-        <Suspense fallback={<div>Loading.....</div>}>
-          <UserProfile />
-        </Suspense>
-      ),
-    },
-{
+  {
     path: "post/:id",
     element: (
       <Suspense fallback={<div>Loading.....</div>}>
         <PostDetail />
+      </Suspense>
+    ),
+  },
+  {
+    path: "user/:username",
+    element: (
+      <Suspense fallback={<div>Loading.....</div>}>
+        <UserProfile />
       </Suspense>
     ),
   },
@@ -66,8 +75,8 @@ const mainRoutes = [
       <Suspense fallback={<div>Loading.....</div>}>
         <NotFound />
       </Suspense>
-    )
-  }
+    ),
+  },
 ];
 
 const routes = [
