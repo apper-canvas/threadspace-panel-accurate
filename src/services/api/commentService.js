@@ -70,7 +70,9 @@ timestamp: new Date().toISOString(),
       throw new Error('Comment not found');
     }
 
-    comment.score = newScore;
+comment.score = newScore;
     return { ...comment };
   }
 }
+
+export const commentService = CommentService;
