@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
-import { PostService } from '@/services/api/postService';
-import { CommentService } from '@/services/api/commentService';
-import VoteButtons from '@/components/molecules/VoteButtons';
-import Loading from '@/components/ui/Loading';
-import Error from '@/components/ui/Error';
-import Empty from '@/components/ui/Empty';
-import ApperIcon from '@/components/ApperIcon';
-import Button from '@/components/atoms/Button';
-import Textarea from '@/components/atoms/Textarea';
-import { toast } from 'react-toastify';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
+import { toast } from "react-toastify";
+import { PostService } from "@/services/api/postService";
+import { CommentService } from "@/services/api/commentService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import Empty from "@/components/ui/Empty";
+import Error from "@/components/ui/Error";
+import Button from "@/components/atoms/Button";
+import Textarea from "@/components/atoms/Textarea";
+import VoteButtons from "@/components/molecules/VoteButtons";
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -299,22 +299,12 @@ function CommentCard({ comment, replies, onVote, depth = 0 }) {
   return (
     <div className={`${depth > 0 ? 'ml-8 pl-4 border-l-2 border-gray-200' : ''}`}>
       <div className="py-3">
-        <div className="flex items-start gap-3">
-          <div className="flex flex-col items-center gap-1">
-            <button
-              onClick={() => onVote(comment.Id, 1)}
-              className="text-gray-400 hover:text-primary transition-colors p-1"
-            >
-              <ApperIcon name="ChevronUp" size={16} />
-            </button>
-            <span className="text-sm font-medium text-gray-700">{comment.score}</span>
-            <button
-              onClick={() => onVote(comment.Id, -1)}
-              className="text-gray-400 hover:text-accent transition-colors p-1"
-            >
-              <ApperIcon name="ChevronDown" size={16} />
-            </button>
-          </div>
+<div className="flex items-start gap-3">
+          <VoteButtons
+            score={comment.score}
+            onVote={(voteValue) => onVote(comment.Id, voteValue)}
+            size="sm"
+          />
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
