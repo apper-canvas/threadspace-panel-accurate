@@ -84,6 +84,24 @@ export default function Root() {
       dispatch(clearUser());
       handleAuthComplete();
     }
+};
+
+  const handleNavigation = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectPath = urlParams.get("redirect");
+
+    if (redirectPath) {
+      navigate(redirectPath);
+    } else {
+      // Navigate to home only if on auth pages
+      const authPages = ["/login", "/signup", "/callback"];
+      const isOnAuthPage = authPages.some(page =>
+        window.location.pathname.includes(page)
+      );
+      if (isOnAuthPage) {
+        navigate("/");
+      }
+    }
   };
 
   const handleAuthSuccess = (user) => {
