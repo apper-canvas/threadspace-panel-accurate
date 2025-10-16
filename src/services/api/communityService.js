@@ -1,97 +1,308 @@
-import communitiesData from "@/services/mockData/communities.json";
+import { getApperClient } from "@/services/apperClient";
 
 export class CommunityService {
-  static communities = [...communitiesData];
-
   static async search(query) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    if (!query || !query.trim()) {
-      return [];
-    }
+    try {
+      if (!query || !query.trim()) {
+        return [];
+      }
 
-    const searchTerm = query.toLowerCase().trim();
-    const results = [];
-
-    for (const community of this.communities) {
-      const nameMatch = community.name.toLowerCase().includes(searchTerm);
-      const descMatch = community.description.toLowerCase().includes(searchTerm);
-      const categoryMatch = community.category.toLowerCase().includes(searchTerm);
-
-      if (nameMatch || descMatch || categoryMatch) {
+      const apperClient = getApperClient();
+      const searchTerm = query.toLowerCase().trim();
+      
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "name_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "member_count_c"}},
+          {"field": {"Name": "color_c"}},
+          {"field": {"Name": "Tags"}}
+        ],
+        whereGroups: [{
+          "operator": "OR",
+          "subGroups": [
+            {
+              "conditions": [
+                {
+                  "fieldName": "name_c",
+                  "operator": "Contains",
+                  "values": [searchTerm]
+                }
+              ],
+              "operator": "OR"
+            },
+            {
+              "conditions": [
+                {
+                  "fieldName": "description_c",
+                  "operator": "Contains",
+                  "values": [searchTerm]
+                }
+              ],
+              "operator": "OR"
+            },
+            {
+              "conditions": [
+                {
+                  "fieldName": "Tags",
+                  "operator": "Contains",
+                  "values": [searchTerm]
+                }
+              ],
+              "operator": "OR"
+            }
+          ]
+        }]
+      };
+      
+      const response = await apperClient.fetchRecords('community_c', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+      
+      const results = [];
+      for (const community of response.data) {
         let snippet = '';
+        const name = community.name_c || '';
+        const description = community.description_c || '';
+        const tags = community.Tags || '';
         
-        if (descMatch) {
-          const index = community.description.toLowerCase().indexOf(searchTerm);
+        if (description.toLowerCase().includes(searchTerm)) {
+          const index = description.toLowerCase().indexOf(searchTerm);
           const start = Math.max(0, index - 40);
-          const end = Math.min(community.description.length, index + searchTerm.length + 40);
-          snippet = community.description.substring(start, end);
-        } else if (categoryMatch) {
-          snippet = `Category: ${community.category}`;
+          const end = Math.min(description.length, index + searchTerm.length + 40);
+          snippet = description.substring(start, end);
+        } else if (tags.toLowerCase().includes(searchTerm)) {
+          snippet = `Category: ${tags}`;
         }
 
         results.push({
-          community,
+          community: {
+            Id: community.Id,
+            name: name,
+            description: description,
+            memberCount: community.member_count_c || 0,
+            color: community.color_c || "#FF4500",
+            category: tags
+          },
           snippet: snippet.trim()
         });
       }
+      
+      return results;
+    } catch (error) {
+      console.error("Error searching communities:", error);
+      return [];
     }
-
-    return results;
   }
-  static delay = () => new Promise(resolve => setTimeout(resolve, 250));
 
   static async getAll() {
-    await this.delay();
-    return [...this.communities.map(community => ({ ...community }))];
+    try {
+      const apperClient = getApperClient();
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "name_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "member_count_c"}},
+          {"field": {"Name": "color_c"}},
+          {"field": {"Name": "Tags"}}
+        ]
+      };
+      
+      const response = await apperClient.fetchRecords('community_c', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+      
+      return response.data.map(community => ({
+        Id: community.Id,
+        id: `community_${community.Id}`,
+        name: community.name_c || '',
+        description: community.description_c || '',
+        memberCount: community.member_count_c || 0,
+        color: community.color_c || "#FF4500",
+        category: community.Tags || '',
+        postCount: 0
+      }));
+    } catch (error) {
+      console.error("Error fetching communities:", error);
+      return [];
+    }
   }
 
   static async getById(id) {
-    await this.delay();
-    const community = this.communities.find(c => c.Id === parseInt(id));
-    return community ? { ...community } : null;
+    try {
+      const apperClient = getApperClient();
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "name_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "member_count_c"}},
+          {"field": {"Name": "color_c"}},
+          {"field": {"Name": "Tags"}}
+        ]
+      };
+      
+      const response = await apperClient.getRecordById('community_c', parseInt(id), params);
+      
+      if (!response.success || !response.data) {
+        return null;
+      }
+      
+      const community = response.data;
+      return {
+        Id: community.Id,
+        id: `community_${community.Id}`,
+        name: community.name_c || '',
+        description: community.description_c || '',
+        memberCount: community.member_count_c || 0,
+        color: community.color_c || "#FF4500",
+        category: community.Tags || '',
+        postCount: 0
+      };
+    } catch (error) {
+      console.error(`Error fetching community ${id}:`, error);
+      return null;
+    }
   }
 
   static async getByName(name) {
-    await this.delay();
-    const community = this.communities.find(c => c.name.toLowerCase() === name.toLowerCase());
-    return community ? { ...community } : null;
+    try {
+      const apperClient = getApperClient();
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "name_c"}},
+          {"field": {"Name": "description_c"}},
+          {"field": {"Name": "member_count_c"}},
+          {"field": {"Name": "color_c"}},
+          {"field": {"Name": "Tags"}}
+        ],
+        where: [{
+          "FieldName": "name_c",
+          "Operator": "EqualTo",
+          "Values": [name]
+        }]
+      };
+      
+      const response = await apperClient.fetchRecords('community_c', params);
+      
+      if (!response.success || !response.data || response.data.length === 0) {
+        return null;
+      }
+      
+      const community = response.data[0];
+      return {
+        Id: community.Id,
+        id: `community_${community.Id}`,
+        name: community.name_c || '',
+        description: community.description_c || '',
+        memberCount: community.member_count_c || 0,
+        color: community.color_c || "#FF4500",
+        category: community.Tags || '',
+        postCount: 0
+      };
+    } catch (error) {
+      console.error(`Error fetching community by name ${name}:`, error);
+      return null;
+    }
   }
 
   static async create(communityData) {
-    await this.delay();
-    
-    const maxId = Math.max(...this.communities.map(c => c.Id), 0);
-    const newCommunity = {
-      Id: maxId + 1,
-      id: `community_${maxId + 1}`,
-      name: communityData.name,
-      description: communityData.description,
-      memberCount: communityData.memberCount || 1,
-      color: communityData.color || "#FF4500"
-    };
-    
-    this.communities.push(newCommunity);
-    return { ...newCommunity };
+    try {
+      const apperClient = getApperClient();
+      const params = {
+        records: [{
+          name_c: communityData.name || '',
+          description_c: communityData.description || '',
+          member_count_c: communityData.memberCount || 1,
+          color_c: communityData.color || "#FF4500",
+          Tags: communityData.category || ''
+        }]
+      };
+      
+      const response = await apperClient.createRecord('community_c', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return null;
+      }
+      
+      if (response.results && response.results.length > 0) {
+        const created = response.results[0];
+        if (created.success) {
+          return await this.getById(created.data.Id);
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error creating community:", error);
+      return null;
+    }
   }
 
   static async update(id, updateData) {
-    await this.delay();
-    
-    const index = this.communities.findIndex(c => c.Id === parseInt(id));
-    if (index === -1) return null;
-    
-    this.communities[index] = { ...this.communities[index], ...updateData };
-    return { ...this.communities[index] };
+    try {
+      const apperClient = getApperClient();
+      const updateRecord = { Id: parseInt(id) };
+      
+      if (updateData.name) updateRecord.name_c = updateData.name;
+      if (updateData.description) updateRecord.description_c = updateData.description;
+      if (updateData.memberCount !== undefined) updateRecord.member_count_c = updateData.memberCount;
+      if (updateData.color) updateRecord.color_c = updateData.color;
+      if (updateData.category) updateRecord.Tags = updateData.category;
+      
+      const params = {
+        records: [updateRecord]
+      };
+      
+      const response = await apperClient.updateRecord('community_c', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return null;
+      }
+      
+      if (response.results && response.results.length > 0) {
+        const updated = response.results[0];
+        if (updated.success) {
+          return await this.getById(id);
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error(`Error updating community ${id}:`, error);
+      return null;
+    }
   }
 
   static async delete(id) {
-    await this.delay();
-    
-    const index = this.communities.findIndex(c => c.Id === parseInt(id));
-    if (index === -1) return false;
-    
-    this.communities.splice(index, 1);
-    return true;
+    try {
+      const apperClient = getApperClient();
+      const params = {
+        RecordIds: [parseInt(id)]
+      };
+      
+      const response = await apperClient.deleteRecord('community_c', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        return false;
+      }
+      
+      return response.results && response.results.length > 0 && response.results[0].success;
+    } catch (error) {
+      console.error(`Error deleting community ${id}:`, error);
+      return false;
 }
+  }
 }

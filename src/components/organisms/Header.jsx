@@ -1,10 +1,15 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { useAuth } from "@/layouts/Root";
+import { useSelector } from "react-redux";
 import ApperIcon from "@/components/ApperIcon";
-import SearchBar from "@/components/molecules/SearchBar";
 import Button from "@/components/atoms/Button";
+import SearchBar from "@/components/molecules/SearchBar";
+
 
 const Header = ({ onCreatePost }) => {
-  return (
+  const { logout } = useAuth();
+  const { user, isAuthenticated } = useSelector((state) => state.user);
+return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-8">
@@ -15,30 +20,38 @@ const Header = ({ onCreatePost }) => {
             <h1 className="text-xl font-bold text-gray-900">ThreadSpace</h1>
           </div>
           
-<div className="hidden md:block w-96">
+          <div className="hidden md:block w-96">
             <SearchBar />
           </div>
         </div>
-
-        <div className="flex items-center gap-4">
-          <div className="md:hidden">
-            <Button variant="ghost" size="sm">
-              <ApperIcon name="Search" size={20} />
-            </Button>
-          </div>
+        
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onCreatePost}
+            className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-full font-medium transition-colors duration-200"
+          >
+            <ApperIcon name="Plus" size={18} />
+            <span>Create Post</span>
+          </button>
           
-          <Button onClick={onCreatePost} size="md" className="flex items-center gap-2">
-            <ApperIcon name="Plus" size={16} />
-            <span className="hidden sm:inline">Create Post</span>
-          </Button>
+          {isAuthenticated && (
+            <button
+              onClick={logout}
+              className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-full font-medium transition-colors duration-200"
+            >
+              <ApperIcon name="LogOut" size={18} />
+              <span>Logout</span>
+            </button>
+          )}
         </div>
       </div>
-      
-<div className="md:hidden px-6 pb-4">
+
+      {/* Mobile Search */}
+      <div className="md:hidden px-6 pb-4">
         <SearchBar />
       </div>
     </header>
-);
+  );
 };
 
 export default Header;
