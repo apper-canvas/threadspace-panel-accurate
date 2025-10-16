@@ -25,7 +25,7 @@ const UserProfile = () => {
     loadUserProfile();
   }, [username]);
 
-  const loadUserProfile = async () => {
+const loadUserProfile = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -37,17 +37,18 @@ const UserProfile = () => {
         return;
       }
 
-      const allPosts = PostService.getAll();
+      const allPosts = await PostService.getAll();
       const posts = allPosts.filter(post => post.author === username);
 
       const communityNames = [...new Set(posts.map(post => post.community))];
-      const communities = communityNames
-        .map(name => CommunityService.getByName(name))
-        .filter(Boolean);
+      const communities = await Promise.all(
+        communityNames.map(name => CommunityService.getByName(name))
+      );
+      const validCommunities = communities.filter(Boolean);
 
       setUser(userData);
       setUserPosts(posts);
-      setUserCommunities(communities);
+      setUserCommunities(validCommunities);
     } catch (err) {
       setError('Failed to load user profile');
       toast.error('Failed to load user profile');
