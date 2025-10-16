@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import TagInput from "@/components/atoms/TagInput";
 import { CommunityService } from "@/services/api/communityService";
 import { PostService } from "@/services/api/postService";
 import { cn } from "@/utils/cn";
 import ApperIcon from "@/components/ApperIcon";
+import TagInput from "@/components/atoms/TagInput";
 import Button from "@/components/atoms/Button";
 import Select from "@/components/atoms/Select";
 import Input from "@/components/atoms/Input";
@@ -17,8 +17,12 @@ const [formData, setFormData] = useState({
     community: "",
     tags: [],
     postType: "text",
-    imageUrl: null,
-    linkUrl: ""
+imageUrl: null,
+    linkUrl: "",
+    pollOptions: [
+      { Id: 1, text: "", voteCount: 0 },
+      { Id: 2, text: "", voteCount: 0 }
+    ]
   });
   const [communities, setCommunities] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,7 +32,19 @@ const [formData, setFormData] = useState({
     if (isOpen) {
       loadCommunities();
       // Reset form when modal opens
-setFormData({ title: "", content: "", community: "", tags: [], postType: "text", imageUrl: null, linkUrl: "" });
+setFormData({ 
+      title: "", 
+      content: "", 
+      community: "", 
+      tags: [], 
+      postType: "text", 
+      imageUrl: null, 
+      linkUrl: "",
+      pollOptions: [
+        { Id: 1, text: "", voteCount: 0 },
+        { Id: 2, text: "", voteCount: 0 }
+      ]
+    });
       setErrors({});
     }
   }, [isOpen]);
@@ -74,6 +90,13 @@ const newErrors = {};
           newErrors.linkUrl = "Please enter a valid URL";
         }
       }
+}
+
+if (formData.postType === 'poll') {
+      const validOptions = formData.pollOptions.filter(opt => opt.text.trim());
+      if (validOptions.length < 2) {
+        newErrors.pollOptions = "At least 2 poll options are required";
+      }
     }
     
     if (!formData.community) {
@@ -106,7 +129,14 @@ const newPost = {
         tags: formData.tags,
         postType: formData.postType,
         imageUrl: formData.postType === 'image' ? formData.imageUrl : null,
-        linkUrl: formData.postType === 'link' ? formData.linkUrl.trim() : null
+linkUrl: formData.postType === 'link' ? formData.linkUrl.trim() : null,
+        pollOptions: formData.postType === 'poll' 
+          ? formData.pollOptions.filter(opt => opt.text.trim()).map((opt, idx) => ({
+              Id: idx + 1,
+              text: opt.text.trim(),
+              voteCount: 0
+            }))
+          : null
       };
       
       await PostService.create(newPost);
@@ -156,9 +186,45 @@ const handleInputChange = (field, value) => {
       postType: type,
       content: "",
       imageUrl: null,
-      linkUrl: ""
+linkUrl: "",
+      pollOptions: [
+        { Id: 1, text: "", voteCount: 0 },
+        { Id: 2, text: "", voteCount: 0 }
+      ]
     }));
     setErrors({});
+  };
+
+  const handleAddPollOption = () => {
+    if (formData.pollOptions.length >= 10) {
+      toast.error("Maximum 10 poll options allowed");
+      return;
+    }
+    const newId = Math.max(...formData.pollOptions.map(opt => opt.Id), 0) + 1;
+    setFormData(prev => ({
+      ...prev,
+      pollOptions: [...prev.pollOptions, { Id: newId, text: "", voteCount: 0 }]
+    }));
+  };
+
+  const handleRemovePollOption = (optionId) => {
+    if (formData.pollOptions.length <= 2) {
+      toast.error("Minimum 2 poll options required");
+      return;
+    }
+    setFormData(prev => ({
+      ...prev,
+      pollOptions: prev.pollOptions.filter(opt => opt.Id !== optionId)
+    }));
+  };
+
+  const handlePollOptionChange = (optionId, value) => {
+    setFormData(prev => ({
+      ...prev,
+      pollOptions: prev.pollOptions.map(opt =>
+        opt.Id === optionId ? { ...opt, text: value } : opt
+      )
+    }));
   };
 
   if (!isOpen) return null;
@@ -218,6 +284,21 @@ return (
               <div className="flex items-center gap-2">
                 <ApperIcon name="Link" size={18} />
                 Link
+              </div>
+</button>
+            <button
+              type="button"
+              onClick={() => handlePostTypeChange('poll')}
+              className={cn(
+                "flex-1 py-3 px-4 rounded-lg border-2 transition-all text-sm font-medium",
+                formData.postType === 'poll'
+                  ? "border-accent bg-accent/5 text-accent"
+                  : "border-gray-200 text-gray-600 hover:border-gray-300"
+              )}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <ApperIcon name="BarChart3" size={18} />
+                <span>Poll</span>
               </div>
             </button>
           </div>
@@ -314,6 +395,55 @@ return (
             </div>
           )}
           
+{formData.postType === 'poll' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">
+                  Poll Options
+                </label>
+                <span className="text-xs text-gray-500">
+                  {formData.pollOptions.length}/10 options
+                </span>
+              </div>
+              {formData.pollOptions.map((option, index) => (
+                <div key={option.Id} className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      placeholder={`Option ${index + 1}`}
+                      value={option.text}
+                      onChange={(e) => handlePollOptionChange(option.Id, e.target.value)}
+                      error={errors.pollOptions && !option.text.trim()}
+                    />
+                  </div>
+                  {formData.pollOptions.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePollOption(option.Id)}
+                      className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <ApperIcon name="X" size={18} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {errors.pollOptions && (
+                <p className="text-xs text-red-500">{errors.pollOptions}</p>
+              )}
+              {formData.pollOptions.length < 10 && (
+                <button
+                  type="button"
+                  onClick={handleAddPollOption}
+                  className="w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-accent hover:text-accent transition-colors"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <ApperIcon name="Plus" size={16} />
+                    <span>Add Option</span>
+                  </div>
+                </button>
+              )}
+            </div>
+          )}
+
           {formData.postType === 'link' && (
             <div className="space-y-2">
               <Input
@@ -359,7 +489,8 @@ disabled={
               !formData.title.trim() || 
               (formData.postType === 'text' && !formData.content.trim()) ||
               (formData.postType === 'image' && !formData.imageUrl) ||
-              (formData.postType === 'link' && !formData.linkUrl.trim())
+              (formData.postType === 'link' && !formData.linkUrl.trim()) ||
+              (formData.postType === 'poll' && formData.pollOptions.filter(opt => opt.text.trim()).length < 2)
             }
             className="flex items-center gap-2"
           >

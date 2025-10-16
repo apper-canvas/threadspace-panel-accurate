@@ -101,7 +101,27 @@ const navigate = useNavigate();
               </div>
             </div>
           )}
-          
+{post.postType === 'poll' && post.pollOptions && (
+            <div className="mt-3 space-y-2">
+              {post.pollOptions.slice(0, 3).map((option, index) => (
+                <div key={option.Id} className="flex items-center text-sm text-gray-600">
+                  <span className="w-5 h-5 flex items-center justify-center rounded-full bg-gray-100 text-xs font-medium mr-2">
+                    {index + 1}
+                  </span>
+                  <span className="flex-1">{option.text}</span>
+                  <span className="text-xs text-gray-500 ml-2">{option.voteCount}</span>
+                </div>
+              ))}
+              {post.pollOptions.length > 3 && (
+                <div className="text-xs text-gray-500 ml-7">
+                  +{post.pollOptions.length - 3} more option{post.pollOptions.length - 3 !== 1 ? 's' : ''}
+                </div>
+              )}
+              <div className="text-xs text-gray-500 mt-2 ml-7">
+                {post.pollOptions.reduce((sum, opt) => sum + opt.voteCount, 0)} total votes
+              </div>
+            </div>
+          )}
           <div className="flex items-center gap-6 text-sm text-gray-500">
             <div className="flex items-center gap-2">
               <ApperIcon name="MessageCircle" size={16} />

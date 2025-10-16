@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { toast } from "react-toastify";
 import { PostService } from "@/services/api/postService";
 import { CommentService } from "@/services/api/commentService";
+import { cn } from "@/utils/cn";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import Empty from "@/components/ui/Empty";
@@ -22,9 +23,10 @@ const [comments, setComments] = useState([]);
 const [commentContent, setCommentContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
-  const [isSaved, setIsSaved] = useState(false);
+const [isSaved, setIsSaved] = useState(false);
+  const [votingOption, setVotingOption] = useState(null);
 
-  useEffect(() => {
+useEffect(() => {
     loadPostAndComments();
   }, [id]);
 
@@ -33,6 +35,9 @@ const [commentContent, setCommentContent] = useState('');
       if (post) {
         const saved = await PostService.isSaved(post.id);
         setIsSaved(saved);
+        if (post.postType === 'poll' && post.userPollVote) {
+          setVotingOption(post.userPollVote);
+        }
       }
     };
     checkSaved();
@@ -63,7 +68,7 @@ const [commentContent, setCommentContent] = useState('');
     }
   }
 
-  async function handleVote(postId, voteValue) {
+async function handleVote(postId, voteValue) {
     try {
       const currentPost = { ...post };
       let newScore = currentPost.score;
@@ -85,6 +90,33 @@ const [commentContent, setCommentContent] = useState('');
       toast.error('Failed to update vote');
       setPost(post);
     }
+  }
+
+  async function handlePollVote(optionId) {
+    if (!post) return;
+    
+    try {
+      const updatedPost = await PostService.pollVote(post.id, optionId);
+      if (updatedPost) {
+        setPost(updatedPost);
+        setVotingOption(updatedPost.userPollVote);
+        toast.success('Vote recorded');
+      }
+    } catch (err) {
+      toast.error('Failed to record vote');
+    }
+  }
+
+  function calculatePollPercentages() {
+    if (!post || !post.pollOptions) return [];
+    
+    const totalVotes = post.pollOptions.reduce((sum, opt) => sum + opt.voteCount, 0);
+    
+    return post.pollOptions.map(option => ({
+      ...option,
+      percentage: totalVotes > 0 ? Math.round((option.voteCount / totalVotes) * 100) : 0,
+      totalVotes
+    }));
   }
 
   async function handleCommentVote(commentId, voteValue) {
@@ -188,6 +220,8 @@ if (!post) {
     setIsSaved(result.saved);
     toast.success(result.saved ? 'Post saved!' : 'Post unsaved');
   };
+const pollResults = post && post.postType === 'poll' ? calculatePollPercentages() : [];
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <Button
@@ -263,6 +297,51 @@ if (!post) {
                 </div>
                 <ApperIcon name="ArrowRight" size={16} className="text-gray-400" />
               </a>
+)}
+
+            {post.postType === 'poll' && post.pollOptions && (
+              <div className="space-y-3 mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-gray-700">Poll Results</h3>
+                  <span className="text-xs text-gray-500">
+                    {pollResults[0]?.totalVotes || 0} {pollResults[0]?.totalVotes === 1 ? 'vote' : 'votes'}
+                  </span>
+                </div>
+                {pollResults.map((option) => (
+                  <div key={option.Id} className="space-y-2">
+                    <button
+                      onClick={() => handlePollVote(option.Id)}
+                      className={cn(
+                        "w-full text-left p-3 rounded-lg border transition-all",
+                        votingOption === option.Id
+                          ? "border-accent bg-accent/5 shadow-sm"
+                          : "border-gray-200 hover:border-accent/50 hover:bg-gray-50"
+                      )}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-900">{option.text}</span>
+                        <span className="text-sm font-semibold text-accent">
+                          {option.percentage}%
+                        </span>
+                      </div>
+                      <div className="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="absolute top-0 left-0 h-full bg-accent transition-all duration-300"
+                          style={{ width: `${option.percentage}%` }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-xs text-gray-500">
+                          {option.voteCount} {option.voteCount === 1 ? 'vote' : 'votes'}
+                        </span>
+                        {votingOption === option.Id && (
+                          <span className="text-xs font-medium text-accent">Your vote</span>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
             
             <div className="flex items-center gap-6 text-sm text-gray-500 pt-4 border-t border-gray-100">

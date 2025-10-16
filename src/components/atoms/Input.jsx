@@ -5,7 +5,8 @@ const Input = React.forwardRef(({
   className, 
   type = "text", 
   label,
-  error,
+error,
+  errorMessage,
   ...props 
 }, ref) => {
   return (
@@ -15,7 +16,7 @@ const Input = React.forwardRef(({
           {label}
         </label>
       )}
-      <input
+<input
         type={type}
         className={cn(
           "flex w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm placeholder:text-gray-400",
@@ -27,6 +28,9 @@ const Input = React.forwardRef(({
         ref={ref}
         {...props}
       />
+      {error && errorMessage && (
+        <p className="mt-1 text-xs text-red-500">{errorMessage}</p>
+      )}
       {error && (
         <p className="mt-1 text-xs text-red-600">{error}</p>
       )}

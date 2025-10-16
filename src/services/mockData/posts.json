@@ -128,5 +128,83 @@
     "timestamp": "2024-01-13T14:50:00.000Z",
     "commentCount": 52,
     "tags": ["local-business", "community", "coffee", "small-business", "support-local"]
+  },
+{
+    "Id": 7,
+    "id": "post_7",
+    "title": "Which programming language should I learn first?",
+    "content": null,
+    "author": "codingNewbie",
+    "community": "learnprogramming",
+    "score": 34,
+    "userVote": 0,
+    "timestamp": "2024-01-12T14:20:00Z",
+    "commentCount": 18,
+    "tags": ["programming", "learning", "advice"],
+    "postType": "poll",
+    "imageUrl": null,
+    "linkUrl": null,
+    "pollOptions": [
+      {
+        "Id": 1,
+        "text": "Python",
+        "voteCount": 15
+      },
+      {
+        "Id": 2,
+        "text": "JavaScript",
+        "voteCount": 12
+      },
+      {
+        "Id": 3,
+        "text": "Java",
+        "voteCount": 5
+      },
+      {
+        "Id": 4,
+        "text": "C++",
+        "voteCount": 2
+      }
+    ],
+    "userPollVote": null
+  },
+  {
+    "Id": 8,
+    "id": "post_8",
+    "title": "What's your favorite feature in the new update?",
+    "content": null,
+    "author": "techEnthusiast",
+    "community": "technology",
+    "score": 67,
+    "userVote": 1,
+    "timestamp": "2024-01-13T09:15:00Z",
+    "commentCount": 23,
+    "tags": ["update", "features", "feedback"],
+    "postType": "poll",
+    "imageUrl": null,
+    "linkUrl": null,
+    "pollOptions": [
+      {
+        "Id": 1,
+        "text": "Dark mode improvements",
+        "voteCount": 28
+      },
+      {
+        "Id": 2,
+        "text": "Performance optimization",
+        "voteCount": 22
+      },
+      {
+        "Id": 3,
+        "text": "New UI components",
+        "voteCount": 12
+      },
+      {
+        "Id": 4,
+        "text": "Bug fixes",
+        "voteCount": 5
+      }
+    ],
+    "userPollVote": 1
   }
 ]

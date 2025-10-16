@@ -6,7 +6,7 @@ export class PostService {
   static comments = [];
   static savedPostIds = new Set();
 
-  static async search(query) {
+static async search(query) {
     await new Promise(resolve => setTimeout(resolve, 300));
     
     if (!query || !query.trim()) {
@@ -18,7 +18,7 @@ export class PostService {
 
     for (const post of this.posts) {
       const titleMatch = post.title.toLowerCase().includes(searchTerm);
-      const contentMatch = post.content.toLowerCase().includes(searchTerm);
+      const contentMatch = post.content && post.content.toLowerCase().includes(searchTerm);
       const authorMatch = post.author.toLowerCase().includes(searchTerm);
       const tagMatch = post.tags.some(tag => tag.toLowerCase().includes(searchTerm));
 
@@ -92,7 +92,7 @@ export class PostService {
     return true;
   }
 
-  static async create(postData) {
+static async create(postData) {
     await this.delay();
     
     const maxId = Math.max(...this.posts.map(p => p.Id), 0);
@@ -100,7 +100,7 @@ export class PostService {
       Id: maxId + 1,
       id: `post_${maxId + 1}`,
       title: postData.title,
-      content: postData.content,
+      content: postData.content || null,
       author: postData.author,
       community: postData.community,
       score: postData.score || 1,
@@ -110,20 +110,27 @@ export class PostService {
       tags: postData.tags || [],
       postType: postData.postType || 'text',
       imageUrl: postData.imageUrl || null,
-      linkUrl: postData.linkUrl || null
+      linkUrl: postData.linkUrl || null,
+      pollOptions: postData.pollOptions || null,
+      userPollVote: null
     };
     
     this.posts.unshift(newPost);
     return { ...newPost };
   }
 
-  static async update(id, updateData) {
+static async update(id, updateData) {
     await this.delay();
     
     const index = this.posts.findIndex(p => p.Id === parseInt(id));
     if (index === -1) return null;
     
-    this.posts[index] = { ...this.posts[index], ...updateData, tags: updateData.tags || this.posts[index].tags };
+    this.posts[index] = { 
+      ...this.posts[index], 
+      ...updateData, 
+      tags: updateData.tags || this.posts[index].tags,
+      pollOptions: updateData.pollOptions || this.posts[index].pollOptions
+    };
     return { ...this.posts[index] };
   }
 
@@ -137,7 +144,7 @@ export class PostService {
     return true;
   }
 
-  static async vote(postId, voteValue) {
+static async vote(postId, voteValue) {
     await this.delay();
     
     const post = this.posts.find(p => p.id === postId);
@@ -149,6 +156,34 @@ export class PostService {
     
     post.userVote = newVote;
     post.score += scoreDiff;
+    
+    return { ...post };
+  }
+
+  static async pollVote(postId, optionId) {
+    await this.delay();
+    
+    const post = this.posts.find(p => p.id === postId);
+    if (!post || post.postType !== 'poll' || !post.pollOptions) return null;
+    
+    const option = post.pollOptions.find(opt => opt.Id === optionId);
+    if (!option) return null;
+    
+    // Remove previous vote if exists
+    if (post.userPollVote !== null) {
+      const prevOption = post.pollOptions.find(opt => opt.Id === post.userPollVote);
+      if (prevOption) {
+        prevOption.voteCount = Math.max(0, prevOption.voteCount - 1);
+      }
+    }
+    
+    // Add new vote or remove if voting for same option
+    if (post.userPollVote === optionId) {
+      post.userPollVote = null;
+    } else {
+      option.voteCount += 1;
+      post.userPollVote = optionId;
+    }
     
     return { ...post };
   }
