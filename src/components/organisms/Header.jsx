@@ -28,20 +28,24 @@ const { logout } = useAuth();
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
-<button
-            onClick={() => {
-              if (!isAuthenticated) {
-                navigate("/login");
-              } else {
-                onCreatePost();
-              }
-            }}
-            className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-full font-medium transition-colors duration-200"
-          >
-            <ApperIcon name="Plus" size={18} />
-            <span>Create Post</span>
-          </button>
+<div className="flex items-center gap-3">
+          {!isAuthenticated ? (
+            <button
+              onClick={() => navigate("/login")}
+              className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-full font-medium transition-colors duration-200"
+            >
+              <ApperIcon name="LogIn" size={18} />
+              <span>Login</span>
+            </button>
+          ) : (
+            <button
+              onClick={onCreatePost}
+              className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-full font-medium transition-colors duration-200"
+            >
+              <ApperIcon name="Plus" size={18} />
+              <span>Create Post</span>
+            </button>
+          )}
           
           {isAuthenticated && (
             <button
