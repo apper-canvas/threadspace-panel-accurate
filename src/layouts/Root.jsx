@@ -109,8 +109,10 @@ const { allowed, redirectTo, excludeRedirectQuery } = verifyRouteAccess(config, 
     }
   };
 
-  const handleAuthSuccess = (user) => {
+const handleAuthSuccess = (user) => {
     if (user) {
+      const userWithRole = { ...user, roles: ["admin"] };
+      dispatch(setUser(userWithRole));
       handleNavigation();
     } else {
       dispatch(clearUser());
