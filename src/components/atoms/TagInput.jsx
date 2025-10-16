@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ApperIcon } from '@/components/ApperIcon';
+import ApperIcon from '@/components/ApperIcon';
 import { cn } from '@/utils/cn';
 
 const TagInput = ({ 
