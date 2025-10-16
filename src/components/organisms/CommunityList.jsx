@@ -115,5 +115,3 @@ const handleCommunityClick = (communityName) => {
 };
 
 export default CommunityList;
-
-export default CommunityList;
