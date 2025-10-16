@@ -303,7 +303,7 @@ return (
           </div>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+<form id="create-post-form" onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)]">
           <Select
             label="Community"
             value={formData.community}
@@ -481,11 +481,12 @@ return (
             Cancel
 </Button>
           
-          <Button
+<Button
             type="submit"
+            form="create-post-form"
             disabled={
               isSubmitting || 
-              !formData.title.trim() || 
+              !formData.title.trim() ||
               (formData.postType === 'text' && !formData.content.trim()) ||
               (formData.postType === 'image' && !formData.imageUrl) ||
               (formData.postType === 'link' && !formData.linkUrl.trim()) ||
