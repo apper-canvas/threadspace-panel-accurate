@@ -8,7 +8,7 @@ import Empty from '@/components/ui/Empty';
 import Button from '@/components/atoms/Button';
 import PostCard from '@/components/organisms/PostCard';
 import { UserService } from '@/services/api/userService';
-import { postService } from '@/services/api/postService';
+import { PostService } from '@/services/api/postService';
 import { commentService } from '@/services/api/commentService';
 
 function Profile() {
@@ -39,7 +39,7 @@ const userData = await UserService.getByUsername(username);
 
       setUser(userData);
 
-      const allPosts = await postService.getAll();
+const allPosts = await PostService.getAll();
       const filteredPosts = allPosts.filter(post => post.author === username);
       setUserPosts(filteredPosts);
 
@@ -57,8 +57,8 @@ const userData = await UserService.getByUsername(username);
 
   const handleVote = async (postId, voteType) => {
     try {
-      await postService.vote(postId, voteType);
-      const updatedPosts = await postService.getAll();
+await PostService.vote(postId, voteType);
+      const updatedPosts = await PostService.getAll();
       const filteredPosts = updatedPosts.filter(post => post.author === username);
       setUserPosts(filteredPosts);
       toast.success(`Post ${voteType}d`);
