@@ -84,7 +84,7 @@ const routes = [
         element: <ResetPassword />
       }),
       {
-        path: "/",
+        path: "",
         element: <Layout />,
         children: [
           createRoute({
