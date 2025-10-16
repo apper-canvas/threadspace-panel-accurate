@@ -7,7 +7,7 @@ import Error from '@/components/ui/Error';
 import Empty from '@/components/ui/Empty';
 import Button from '@/components/atoms/Button';
 import PostCard from '@/components/organisms/PostCard';
-import { userService } from '@/services/api/userService';
+import { UserService } from '@/services/api/userService';
 import { postService } from '@/services/api/postService';
 import { commentService } from '@/services/api/commentService';
 
@@ -30,7 +30,7 @@ function Profile() {
       setLoading(true);
       setError(null);
 
-      const userData = await userService.getByUsername(username);
+const userData = await UserService.getByUsername(username);
       if (!userData) {
         setError('User not found');
         setLoading(false);
