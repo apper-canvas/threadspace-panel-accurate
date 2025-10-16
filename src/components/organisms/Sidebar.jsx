@@ -1,23 +1,22 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import React from "react";
 import { cn } from "@/utils/cn";
 import ApperIcon from "@/components/ApperIcon";
+import Communities from "@/components/pages/Communities";
 
 const Sidebar = ({ className, isMobile = false, onItemClick }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const navigationItems = [
+const navigationItems = [
     { path: "", label: "Home", icon: "Home" },
     { path: "popular", label: "Popular", icon: "TrendingUp" },
-    { path: "communities", label: "Communities", icon: "Users" }
+    { path: "communities", label: "Communities", icon: "Users" },
+    { path: "user/techEnthusiast", label: "Profile", icon: "User" }
   ];
 
   const handleNavigation = (path) => {
-    if (path === "") {
-      navigate("/");
-    } else {
-      navigate(`/${path}`);
-    }
+    navigate(`/${path}`);
     if (onItemClick) onItemClick();
   };
 
