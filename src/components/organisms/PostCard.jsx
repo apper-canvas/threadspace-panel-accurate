@@ -33,10 +33,49 @@ const PostCard = ({ post, onVote }) => {
             {post.title}
           </h2>
           
-          {post.content && (
+{post.postType === 'text' && post.content && (
             <p className="text-gray-700 mb-4 leading-relaxed line-clamp-3">
               {post.content}
             </p>
+          )}
+          
+          {post.postType === 'image' && post.imageUrl && (
+            <div className="mb-4 rounded-lg overflow-hidden">
+              <img 
+                src={post.imageUrl} 
+                alt={post.title}
+                className="w-full max-h-96 object-cover cursor-pointer hover:opacity-95 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(post.imageUrl, '_blank');
+                }}
+              />
+            </div>
+          )}
+          
+          {post.postType === 'link' && post.linkUrl && (
+            <div 
+              className="mb-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(post.linkUrl, '_blank', 'noopener,noreferrer');
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <ApperIcon name="ExternalLink" size={20} className="text-gray-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-accent truncate">
+                    {new URL(post.linkUrl).hostname}
+                  </div>
+                  <div className="text-xs text-gray-500 truncate">
+                    {post.linkUrl}
+                  </div>
+                </div>
+                <ApperIcon name="ArrowRight" size={16} className="text-gray-400 flex-shrink-0" />
+              </div>
+            </div>
           )}
           
           <div className="flex items-center gap-6 text-sm text-gray-500">

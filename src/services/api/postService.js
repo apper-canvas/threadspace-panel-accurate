@@ -32,7 +32,7 @@ const maxId = Math.max(...this.posts.map(p => p.Id), 0);
     const newPost = {
       Id: maxId + 1,
       id: `post_${maxId + 1}`,
-      title: postData.title,
+title: postData.title,
       content: postData.content,
       author: postData.author,
       community: postData.community,
@@ -40,7 +40,10 @@ const maxId = Math.max(...this.posts.map(p => p.Id), 0);
       userVote: postData.userVote || 1,
       timestamp: postData.timestamp,
       commentCount: postData.commentCount || 0,
-      tags: postData.tags || []
+      tags: postData.tags || [],
+      postType: postData.postType || 'text',
+      imageUrl: postData.imageUrl || null,
+      linkUrl: postData.linkUrl || null
     };
     
     this.posts.unshift(newPost);

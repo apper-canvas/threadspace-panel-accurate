@@ -15,7 +15,10 @@ const [formData, setFormData] = useState({
     title: "",
     content: "",
     community: "",
-    tags: []
+    tags: [],
+    postType: "text",
+    imageUrl: null,
+    linkUrl: ""
   });
   const [communities, setCommunities] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +28,7 @@ const [formData, setFormData] = useState({
     if (isOpen) {
       loadCommunities();
       // Reset form when modal opens
-setFormData({ title: "", content: "", community: "", tags: [] });
+setFormData({ title: "", content: "", community: "", tags: [], postType: "text", imageUrl: null, linkUrl: "" });
       setErrors({});
     }
   }, [isOpen]);
@@ -43,7 +46,7 @@ setFormData({ title: "", content: "", community: "", tags: [] });
   };
 
   const validateForm = () => {
-    const newErrors = {};
+const newErrors = {};
     
     if (!formData.title.trim()) {
       newErrors.title = "Title is required";
@@ -51,10 +54,26 @@ setFormData({ title: "", content: "", community: "", tags: [] });
       newErrors.title = "Title must be less than 300 characters";
     }
     
-    if (!formData.content.trim()) {
-      newErrors.content = "Content is required";
-    } else if (formData.content.length > 10000) {
-      newErrors.content = "Content must be less than 10,000 characters";
+    if (formData.postType === 'text') {
+      if (!formData.content.trim()) {
+        newErrors.content = "Content is required";
+      } else if (formData.content.length > 10000) {
+        newErrors.content = "Content must be less than 10,000 characters";
+      }
+    } else if (formData.postType === 'image') {
+      if (!formData.imageUrl) {
+        newErrors.imageUrl = "Please upload an image";
+      }
+    } else if (formData.postType === 'link') {
+      if (!formData.linkUrl.trim()) {
+        newErrors.linkUrl = "URL is required";
+      } else {
+        try {
+          new URL(formData.linkUrl);
+        } catch {
+          newErrors.linkUrl = "Please enter a valid URL";
+        }
+      }
     }
     
     if (!formData.community) {
@@ -77,14 +96,17 @@ setErrors(newErrors);
     try {
 const newPost = {
         title: formData.title.trim(),
-        content: formData.content.trim(),
+        content: formData.postType === 'text' ? formData.content.trim() : '',
         community: formData.community,
         author: "currentUser",
         timestamp: new Date().toISOString(),
         score: 1,
         userVote: 1,
         commentCount: 0,
-        tags: formData.tags
+        tags: formData.tags,
+        postType: formData.postType,
+        imageUrl: formData.postType === 'image' ? formData.imageUrl : null,
+        linkUrl: formData.postType === 'link' ? formData.linkUrl.trim() : null
       };
       
       await PostService.create(newPost);
@@ -103,13 +125,40 @@ const newPost = {
     }
   };
 
-  const handleInputChange = (field, value) => {
+const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
+  };
+  
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors(prev => ({ ...prev, imageUrl: "Image must be less than 5MB" }));
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        handleInputChange('imageUrl', reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handlePostTypeChange = (type) => {
+    setFormData(prev => ({
+      ...prev,
+      postType: type,
+      content: "",
+      imageUrl: null,
+      linkUrl: ""
+    }));
+    setErrors({});
   };
 
   if (!isOpen) return null;
@@ -127,6 +176,52 @@ return (
             <ApperIcon name="X" size={24} />
           </button>
         </div>
+<div className="border-b border-gray-200">
+          <div className="flex px-6 pt-4">
+            <button
+              type="button"
+              onClick={() => handlePostTypeChange('text')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                formData.postType === 'text'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <ApperIcon name="FileText" size={18} />
+                Text
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePostTypeChange('image')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                formData.postType === 'image'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <ApperIcon name="Image" size={18} />
+                Image
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePostTypeChange('link')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                formData.postType === 'link'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <ApperIcon name="Link" size={18} />
+                Link
+              </div>
+            </button>
+          </div>
+        </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-140px)]">
           <Select
@@ -142,8 +237,7 @@ return (
               </option>
             ))}
           </Select>
-          
-          <Input
+<Input
             label="Title"
             value={formData.title}
             onChange={(e) => handleInputChange("title", e.target.value)}
@@ -152,20 +246,94 @@ return (
             maxLength={300}
           />
           
-          <div className="space-y-2">
-            <Textarea
-              label="Content"
-              value={formData.content}
-              onChange={(e) => handleInputChange("content", e.target.value)}
-              placeholder="What are your thoughts?"
-              rows={8}
-              error={errors.content}
-              maxLength={10000}
-            />
-            <div className="text-sm text-gray-500 text-right">
-              {formData.content.length}/10,000 characters
+          {formData.postType === 'text' && (
+            <div className="space-y-2">
+              <Textarea
+                label="Content"
+                value={formData.content}
+                onChange={(e) => handleInputChange("content", e.target.value)}
+                placeholder="What are your thoughts?"
+                rows={8}
+                error={errors.content}
+                maxLength={10000}
+              />
+              <div className="text-sm text-gray-500 text-right">
+                {formData.content.length}/10,000 characters
+              </div>
             </div>
-          </div>
+          )}
+          
+          {formData.postType === 'image' && (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Upload Image
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                {formData.imageUrl ? (
+                  <div className="space-y-3">
+                    <img 
+                      src={formData.imageUrl} 
+                      alt="Preview" 
+                      className="max-h-64 mx-auto rounded-lg object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleInputChange('imageUrl', null)}
+                    >
+                      Remove Image
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <ApperIcon name="Upload" size={48} className="mx-auto text-gray-400" />
+                    <div className="text-sm text-gray-600">
+                      Click to upload or drag and drop
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      PNG, JPG, GIF up to 5MB
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label htmlFor="image-upload">
+                      <Button type="button" variant="outline" onClick={() => document.getElementById('image-upload').click()}>
+                        Choose File
+                      </Button>
+                    </label>
+                  </div>
+                )}
+              </div>
+              {errors.imageUrl && (
+                <p className="text-sm text-red-500 mt-1">{errors.imageUrl}</p>
+              )}
+            </div>
+          )}
+          
+          {formData.postType === 'link' && (
+            <div className="space-y-2">
+              <Input
+                label="URL"
+                value={formData.linkUrl}
+                onChange={(e) => handleInputChange("linkUrl", e.target.value)}
+                placeholder="https://example.com"
+                error={errors.linkUrl}
+                type="url"
+              />
+              {formData.linkUrl && !errors.linkUrl && (
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <ApperIcon name="Link" size={16} />
+                    <span className="truncate">{formData.linkUrl}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           
           <TagInput
             label="Tags"
@@ -186,7 +354,13 @@ return (
           
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting || !formData.title.trim() || !formData.content.trim()}
+disabled={
+              isSubmitting || 
+              !formData.title.trim() || 
+              (formData.postType === 'text' && !formData.content.trim()) ||
+              (formData.postType === 'image' && !formData.imageUrl) ||
+              (formData.postType === 'link' && !formData.linkUrl.trim())
+            }
             className="flex items-center gap-2"
           >
             {isSubmitting ? (
