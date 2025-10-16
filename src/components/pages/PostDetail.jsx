@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "react-toastify";
 import { PostService } from "@/services/api/postService";
@@ -16,16 +17,17 @@ import VoteButtons from "@/components/molecules/VoteButtons";
 export default function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useSelector(state => state.user);
   const [post, setPost] = useState(null);
-const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-const [commentContent, setCommentContent] = useState('');
+  const [commentContent, setCommentContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
-const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [votingOption, setVotingOption] = useState(null);
-
 useEffect(() => {
     loadPostAndComments();
   }, [id]);
@@ -69,6 +71,12 @@ useEffect(() => {
   }
 
 async function handleVote(postId, voteValue) {
+    if (!user) {
+      toast.info('Please log in to vote on posts');
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+      return;
+    }
+
     try {
       const currentPost = { ...post };
       let newScore = currentPost.score;
@@ -92,7 +100,13 @@ async function handleVote(postId, voteValue) {
     }
   }
 
-  async function handlePollVote(optionId) {
+async function handlePollVote(optionId) {
+    if (!user) {
+      toast.info('Please log in to vote in polls');
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+      return;
+    }
+
     if (!post) return;
     
     try {
@@ -119,7 +133,13 @@ async function handleVote(postId, voteValue) {
     }));
   }
 
-  async function handleCommentVote(commentId, voteValue) {
+async function handleCommentVote(commentId, voteValue) {
+    if (!user) {
+      toast.info('Please log in to vote on comments');
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+      return;
+    }
+
     try {
       const comment = comments.find(c => c.Id === commentId);
       if (!comment) return;
@@ -140,6 +160,12 @@ async function handleVote(postId, voteValue) {
 async function handleSubmitComment(e, parentId = null) {
     e.preventDefault();
     
+    if (!user) {
+      toast.info('Please log in to comment on posts');
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+      return;
+    }
+
     if (!commentContent.trim()) {
       toast.error('Please enter a comment');
       return;
@@ -215,7 +241,13 @@ if (!post) {
 
   const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
 
-  const handleSave = async () => {
+const handleSave = async () => {
+    if (!user) {
+      toast.info('Please log in to save posts');
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+      return;
+    }
+
     const result = await PostService.toggleSave(post.id);
     setIsSaved(result.saved);
     toast.success(result.saved ? 'Post saved!' : 'Post unsaved');
@@ -344,18 +376,27 @@ const pollResults = post && post.postType === 'poll' ? calculatePollPercentages(
               </div>
             )}
             
-            <div className="flex items-center gap-6 text-sm text-gray-500 pt-4 border-t border-gray-100">
+<div className="flex items-center gap-6 text-sm text-gray-500 pt-4 border-t border-gray-100">
               <div className="flex items-center gap-2">
                 <ApperIcon name="MessageCircle" size={16} />
                 <span>{post.commentCount || 0} comments</span>
               </div>
               
-              <button className="flex items-center gap-2 hover:text-gray-700 transition-colors p-1">
+              <button 
+                onClick={() => {
+                  if (!user) {
+                    toast.info('Please log in to share posts');
+                    navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+                    return;
+                  }
+                }}
+                className="flex items-center gap-2 hover:text-gray-700 transition-colors p-1"
+              >
                 <ApperIcon name="Share" size={16} />
                 <span>Share</span>
               </button>
               
-<button 
+              <button 
                 onClick={handleSave}
                 className="flex items-center gap-2 hover:text-gray-700 transition-colors p-1"
               >

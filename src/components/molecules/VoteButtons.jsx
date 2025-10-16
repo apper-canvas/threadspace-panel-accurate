@@ -1,11 +1,23 @@
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 import { cn } from "@/utils/cn";
 import ApperIcon from "@/components/ApperIcon";
 
 const VoteButtons = ({ score, userVote, onVote, postId }) => {
   const [isAnimating, setIsAnimating] = useState(false);
+  const { user } = useSelector(state => state.user);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleVote = (voteValue) => {
+    if (!user) {
+      toast.info('Please log in to vote on posts');
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+      return;
+    }
+
     if (isAnimating) return;
     
     setIsAnimating(true);

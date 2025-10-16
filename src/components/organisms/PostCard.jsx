@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { PostService } from "@/services/api/postService";
@@ -7,9 +8,11 @@ import { cn } from "@/utils/cn";
 import ApperIcon from "@/components/ApperIcon";
 import VoteButtons from "@/components/molecules/VoteButtons";
 const PostCard = ({ post, onVote }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useSelector(state => state.user);
   const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
   const [isSaved, setIsSaved] = useState(false);
-
   useEffect(() => {
     const checkSaved = async () => {
       const saved = await PostService.isSaved(post.id);
@@ -18,15 +21,20 @@ const PostCard = ({ post, onVote }) => {
     checkSaved();
   }, [post.id]);
 
-  const handleSave = async (e) => {
+const handleSave = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!user) {
+      toast.info('Please log in to save posts');
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+      return;
+    }
+
     const result = await PostService.toggleSave(post.id);
     setIsSaved(result.saved);
     toast.success(result.saved ? 'Post saved!' : 'Post unsaved');
-  };
-
-const navigate = useNavigate();
+};
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all duration-200 hover:post-card-hover group">
@@ -128,21 +136,27 @@ const navigate = useNavigate();
               <span>{post.commentCount || 0} comments</span>
             </div>
             
-            <button 
+<button 
               className="flex items-center gap-2 hover:text-gray-700 transition-colors duration-200 p-1"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                
+                if (!user) {
+                  toast.info('Please log in to share posts');
+                  navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+                  return;
+                }
               }}
             >
               <ApperIcon name="Share" size={16} />
               <span>Share</span>
             </button>
             
-<button 
+            <button 
               className="flex items-center gap-2 hover:text-gray-700 transition-colors duration-200 p-1"
               onClick={handleSave}
->
+            >
               <ApperIcon name="Bookmark" size={16} fill={isSaved ? 'currentColor' : 'none'} />
               <span>{isSaved ? 'Saved' : 'Save'}</span>
             </button>
