@@ -87,51 +87,11 @@ export default function Root() {
   };
 
   const handleAuthSuccess = (user) => {
-    let currentPath = window.location.pathname + window.location.search;
-    let redirectPath = new URLSearchParams(window.location.search).get('redirect');
-    const isAuthPage = currentPath.includes('/login') || currentPath.includes('/signup') || 
-                       currentPath.includes('/callback') || currentPath.includes('/error');
-    
     if (user) {
-      dispatch(setUser(JSON.parse(JSON.stringify(user))));
-      
-      if (redirectPath) {
-        navigate(redirectPath);
-      } else if (!isAuthPage) {
-        if (!currentPath.includes('/login') && !currentPath.includes('/signup')) {
-          navigate(currentPath);
-        } else {
-          navigate('/');
-        }
-      } else {
-        navigate('/');
-      }
+      handleNavigation();
     } else {
       dispatch(clearUser());
-      
-      if (!isAuthPage) {
-        navigate(
-          currentPath.includes('/signup')
-            ? `/signup?redirect=${currentPath}`
-            : currentPath.includes('/login')
-            ? `/login?redirect=${currentPath}`
-            : '/login'
-        );
-      } else if (redirectPath) {
-        if (
-          !['error', 'signup', 'login', 'callback'].some((path) => currentPath.includes(path))
-        ) {
-          navigate(`/login?redirect=${redirectPath}`);
-        } else {
-          navigate(currentPath);
-        }
-      } else if (isAuthPage) {
-        navigate(currentPath);
-      } else {
-        navigate('/login');
-      }
     }
-    
     handleAuthComplete();
   };
 
