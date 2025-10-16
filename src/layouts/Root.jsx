@@ -44,9 +44,14 @@ export default function Root() {
 
     const config = getRouteConfig(location.pathname);
 
-    const { allowed, redirectTo, excludeRedirectQuery } = verifyRouteAccess(config, user);
+const { allowed, redirectTo, excludeRedirectQuery } = verifyRouteAccess(config, user);
 
     if (allowed || !redirectTo) return;
+
+    // Skip redirect if user is authenticated and trying to access auth pages
+    const authPages = ['/login', '/signup', '/callback', '/error', '/prompt-password', '/reset-password'];
+    const isAuthPage = authPages.some(page => location.pathname.includes(page));
+    if (user && isAuthPage) return;
 
     let redirectUrl = redirectTo;
     if (!excludeRedirectQuery) {
