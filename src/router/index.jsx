@@ -1,16 +1,15 @@
 import { createBrowserRouter } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
-const SearchResults = lazy(() => import("@/components/pages/SearchResults"));
 import Layout from "@/components/organisms/Layout";
 
 const Home = lazy(() => import("@/components/pages/Home"));
 const Popular = lazy(() => import("@/components/pages/Popular"));
 const Communities = lazy(() => import("@/components/pages/Communities"));
-const CommunityDetail = lazy(() => import("@/components/pages/CommunityDetail"));
-const UserProfile = lazy(() => import("@/components/pages/UserProfile"));
-const NotFound = lazy(() => import("@/components/pages/NotFound"));
-const PostDetail = lazy(() => import("@/components/pages/PostDetail"));
 const Saved = lazy(() => import("@/components/pages/Saved"));
+const SearchResults = lazy(() => import("@/components/pages/SearchResults"));
+const CommunityDetail = lazy(() => import("@/components/pages/CommunityDetail"));
+const PostDetail = lazy(() => import("@/components/pages/PostDetail"));
+const NotFound = lazy(() => import("@/components/pages/NotFound"));
 const mainRoutes = [
   {
     path: "",
@@ -38,13 +37,13 @@ const mainRoutes = [
     ),
   },
   {
-    path: "search",
+path: "search",
     element: (
       <Suspense fallback={<div>Loading.....</div>}>
         <SearchResults />
       </Suspense>
-    ),
-},
+    )
+  },
   {
     path: "community/:communityName",
     element: (
@@ -54,31 +53,15 @@ const mainRoutes = [
     ),
   },
   {
-    path: "post/:id",
+path: "post/:id",
     element: (
       <Suspense fallback={<div>Loading.....</div>}>
         <PostDetail />
       </Suspense>
-    ),
+    )
   },
   {
-    path: "user/:username",
-    element: (
-      <Suspense fallback={<div>Loading.....</div>}>
-        <UserProfile />
-      </Suspense>
-    ),
-  },
-  {
-    path: "*",
-    element: (
-      <Suspense fallback={<div>Loading.....</div>}>
-        <NotFound />
-      </Suspense>
-    ),
-},
-  {
-    path: "saved",
+path: "saved",
     element: (
       <Suspense fallback={<div>Loading.....</div>}>
         <Saved />
