@@ -9,6 +9,7 @@ const Saved = lazy(() => import("@/components/pages/Saved"));
 const SearchResults = lazy(() => import("@/components/pages/SearchResults"));
 const CommunityDetail = lazy(() => import("@/components/pages/CommunityDetail"));
 const PostDetail = lazy(() => import("@/components/pages/PostDetail"));
+const Profile = lazy(() => import("@/components/pages/Profile"));
 const NotFound = lazy(() => import("@/components/pages/NotFound"));
 const mainRoutes = [
   {
@@ -64,7 +65,15 @@ path: "post/:id",
 path: "saved",
     element: (
       <Suspense fallback={<div>Loading.....</div>}>
-        <Saved />
+<Saved />
+      </Suspense>
+    )
+  },
+  {
+    path: "user/:username",
+    element: (
+      <Suspense fallback={<div>Loading.....</div>}>
+        <Profile />
       </Suspense>
     )
   },
