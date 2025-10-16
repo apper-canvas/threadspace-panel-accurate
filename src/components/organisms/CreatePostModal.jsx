@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 import TagInput from "@/components/atoms/TagInput";
 import { CommunityService } from "@/services/api/communityService";
 import { PostService } from "@/services/api/postService";
