@@ -11,6 +11,7 @@ const Sidebar = ({ className, isMobile = false, onItemClick }) => {
 const navigationItems = [
     { path: "", label: "Home", icon: "Home" },
     { path: "popular", label: "Popular", icon: "TrendingUp" },
+    { path: "saved", label: "Saved", icon: "Bookmark" },
     { path: "communities", label: "Communities", icon: "Users" },
     { path: "user/techEnthusiast", label: "Profile", icon: "User" }
   ];

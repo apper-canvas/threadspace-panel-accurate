@@ -169,9 +169,24 @@ function renderComments() {
   if (!post) {
     return <Empty title="Post not found" message="This post may have been removed or doesn't exist." />;
   }
+const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
+  const [isSaved, setIsSaved] = useState(false);
 
-  const timeAgo = formatDistanceToNow(new Date(post.timestamp), { addSuffix: true });
+  useEffect(() => {
+    const checkSaved = async () => {
+      if (post) {
+        const saved = await PostService.isSaved(post.id);
+        setIsSaved(saved);
+      }
+    };
+    checkSaved();
+  }, [post]);
 
+  const handleSave = async () => {
+    const result = await PostService.toggleSave(post.id);
+    setIsSaved(result.saved);
+    toast.success(result.saved ? 'Post saved!' : 'Post unsaved');
+  };
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <Button
@@ -260,9 +275,12 @@ function renderComments() {
                 <span>Share</span>
               </button>
               
-              <button className="flex items-center gap-2 hover:text-gray-700 transition-colors p-1">
-                <ApperIcon name="Bookmark" size={16} />
-                <span>Save</span>
+<button 
+                onClick={handleSave}
+                className="flex items-center gap-2 hover:text-gray-700 transition-colors p-1"
+              >
+                <ApperIcon name="Bookmark" size={16} fill={isSaved ? 'currentColor' : 'none'} />
+                <span>{isSaved ? 'Saved' : 'Save'}</span>
               </button>
             </div>
           </div>
@@ -327,7 +345,6 @@ function CommentCard({ comment, replies, allComments, onVote, onReply, replyingT
               <span>•</span>
               <span>{timeAgo}</span>
             </div>
-            
             <p className="text-gray-700 leading-relaxed mb-2">
               {comment.content}
             </p>

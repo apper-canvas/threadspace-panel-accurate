@@ -10,7 +10,7 @@ const CommunityDetail = lazy(() => import("@/components/pages/CommunityDetail"))
 const UserProfile = lazy(() => import("@/components/pages/UserProfile"));
 const NotFound = lazy(() => import("@/components/pages/NotFound"));
 const PostDetail = lazy(() => import("@/components/pages/PostDetail"));
-
+const Saved = lazy(() => import("@/components/pages/Saved"));
 const mainRoutes = [
   {
     path: "",
@@ -76,7 +76,23 @@ const mainRoutes = [
         <NotFound />
       </Suspense>
     ),
+},
+  {
+    path: "saved",
+    element: (
+      <Suspense fallback={<div>Loading.....</div>}>
+        <Saved />
+      </Suspense>
+    )
   },
+  {
+    path: "*",
+    element: (
+      <Suspense fallback={<div>Loading.....</div>}>
+        <NotFound />
+      </Suspense>
+    )
+  }
 ];
 
 const routes = [

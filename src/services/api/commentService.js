@@ -37,7 +37,7 @@ const newComment = {
       parentId: commentData.parentId ? parseInt(commentData.parentId) : null,
       author: commentData.author || 'Anonymous',
       content: commentData.content.trim(),
-      timestamp: new Date().toISOString(),
+timestamp: new Date().toISOString(),
       score: 0
     };
 

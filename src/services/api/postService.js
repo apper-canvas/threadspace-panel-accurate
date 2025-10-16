@@ -4,6 +4,7 @@ import { CommunityService } from "@/services/api/communityService";
 export class PostService {
   static posts = [...postsData];
   static comments = [];
+  static savedPostIds = new Set();
 
   static async search(query) {
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -54,7 +55,7 @@ export class PostService {
   static delay = () => new Promise(resolve => setTimeout(resolve, 300));
 
   static async getAll() {
-await this.delay();
+    await this.delay();
     return [...this.posts.map(post => ({ 
       ...post,
       commentCount: this.comments.filter(c => c.postId === post.Id).length 
@@ -63,7 +64,7 @@ await this.delay();
 
   static async getById(id) {
     await this.delay();
-const post = this.posts.find(p => p.Id === parseInt(id));
+    const post = this.posts.find(p => p.Id === parseInt(id));
     if (!post) return null;
     
     const commentCount = this.comments.filter(c => c.postId === parseInt(id)).length;
@@ -76,7 +77,7 @@ const post = this.posts.find(p => p.Id === parseInt(id));
       .filter(post => post.score >= 50)
       .sort((a, b) => b.score - a.score)
       .map(post => ({ ...post }));
-}
+  }
 
   static async getByCommunity(communityName) {
     await this.delay();
@@ -85,7 +86,7 @@ const post = this.posts.find(p => p.Id === parseInt(id));
       .map(post => ({ ...post }));
   }
 
-static async addComment(postId, commentId) {
+  static async addComment(postId, commentId) {
     await this.delay();
     this.comments.push({ postId: parseInt(postId), commentId: parseInt(commentId) });
     return true;
@@ -94,11 +95,11 @@ static async addComment(postId, commentId) {
   static async create(postData) {
     await this.delay();
     
-const maxId = Math.max(...this.posts.map(p => p.Id), 0);
+    const maxId = Math.max(...this.posts.map(p => p.Id), 0);
     const newPost = {
       Id: maxId + 1,
       id: `post_${maxId + 1}`,
-title: postData.title,
+      title: postData.title,
       content: postData.content,
       author: postData.author,
       community: postData.community,
@@ -114,7 +115,7 @@ title: postData.title,
     
     this.posts.unshift(newPost);
     return { ...newPost };
-}
+  }
 
   static async update(id, updateData) {
     await this.delay();
@@ -150,5 +151,31 @@ title: postData.title,
     post.score += scoreDiff;
     
     return { ...post };
-}
+  }
+
+  static async toggleSave(postId) {
+    await this.delay();
+    
+    if (this.savedPostIds.has(postId)) {
+      this.savedPostIds.delete(postId);
+      return { saved: false };
+    } else {
+      this.savedPostIds.add(postId);
+      return { saved: true };
+    }
+  }
+
+  static async isSaved(postId) {
+    await this.delay();
+    return this.savedPostIds.has(postId);
+  }
+
+  static async getSaved() {
+    await this.delay();
+    const savedPosts = this.posts.filter(post => this.savedPostIds.has(post.id));
+    return savedPosts.map(post => ({ 
+      ...post,
+      commentCount: this.comments.filter(c => c.postId === post.Id).length 
+    }));
+  }
 }
