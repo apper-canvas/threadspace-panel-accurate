@@ -9,9 +9,10 @@
     "score": 127,
     "userVote": 0,
     "timestamp": "2024-01-15T10:30:00.000Z",
-    "commentCount": 34
+    "commentCount": 34,
+    "tags": ["react", "webdev", "javascript", "nextjs", "frontend", "2024"]
   },
-  {
+{
     "Id": 2,
     "id": "post_2",
     "title": "Just finished my first marathon! Here's what I learned",
@@ -21,9 +22,10 @@
     "score": 89,
     "userVote": 1,
     "timestamp": "2024-01-15T08:15:00.000Z",
-    "commentCount": 28
+    "commentCount": 28,
+    "tags": ["marathon", "running", "fitness", "training", "achievement"]
   },
-  {
+{
     "Id": 3,
     "id": "post_3",
     "title": "My homemade sourdough bread finally worked!",
@@ -33,9 +35,10 @@
     "score": 156,
     "userVote": 0,
     "timestamp": "2024-01-15T06:45:00.000Z",
-    "commentCount": 42
+    "commentCount": 42,
+    "tags": ["sourdough", "baking", "bread", "cooking", "recipe", "fermentation"]
   },
-  {
+{
     "Id": 4,
     "id": "post_4",
     "title": "PSA: New scam targeting job seekers on LinkedIn",
@@ -45,9 +48,10 @@
     "score": 234,
     "userVote": 1,
     "timestamp": "2024-01-14T22:20:00.000Z",
-    "commentCount": 67
+    "commentCount": 67,
+    "tags": ["scam", "linkedin", "jobsearch", "careers", "psa"]
   },
-  {
+{
     "Id": 5,
     "id": "post_5",
     "title": "Captured this sunrise from my backyard this morning",
@@ -57,9 +61,10 @@
     "score": 78,
     "userVote": 0,
     "timestamp": "2024-01-14T15:30:00.000Z",
-    "commentCount": 19
+    "commentCount": 19,
+    "tags": ["photography", "sunrise", "nature", "dslr", "landscape"]
   },
-  {
+{
     "Id": 6,
     "id": "post_6",
     "title": "Anyone else struggling with work-life balance in remote work?",
@@ -69,9 +74,10 @@
     "score": 145,
     "userVote": 0,
     "timestamp": "2024-01-14T12:10:00.000Z",
-    "commentCount": 56
+    "commentCount": 56,
+    "tags": ["remote-work", "work-life-balance", "productivity", "wfh"]
   },
-  {
+{
     "Id": 7,
     "id": "post_7",
     "title": "My dog learned to open doors and now privacy is a myth",
@@ -81,9 +87,10 @@
     "score": 92,
     "userVote": 1,
     "timestamp": "2024-01-14T09:25:00.000Z",
-    "commentCount": 38
+    "commentCount": 38,
+    "tags": ["dogs", "pets", "funny", "golden-retriever", "training"]
   },
-  {
+{
     "Id": 8,
     "id": "post_8",
     "title": "Book recommendation: 'The Seven Husbands of Evelyn Hugo'",
@@ -93,9 +100,10 @@
     "score": 67,
     "userVote": 0,
     "timestamp": "2024-01-13T20:40:00.000Z",
-    "commentCount": 23
+    "commentCount": 23,
+    "tags": ["books", "reading", "fiction", "recommendation", "taylor-jenkins-reid"]
   },
-  {
+{
     "Id": 9,
     "id": "post_9",
     "title": "Climate change discussion: practical steps we can take",
@@ -105,9 +113,10 @@
     "score": 201,
     "userVote": 1,
     "timestamp": "2024-01-13T18:15:00.000Z",
-    "commentCount": 89
+    "commentCount": 89,
+    "tags": ["climate-change", "environment", "sustainability", "green-living"]
   },
-  {
+{
     "Id": 10,
     "id": "post_10",
     "title": "Local coffee shop closes after 20 years - end of an era",
@@ -117,6 +126,7 @@
     "score": 178,
     "userVote": 0,
     "timestamp": "2024-01-13T14:50:00.000Z",
-    "commentCount": 52
+    "commentCount": 52,
+    "tags": ["local-business", "community", "coffee", "small-business", "support-local"]
   }
 ]

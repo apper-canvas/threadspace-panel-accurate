@@ -28,7 +28,7 @@ export class PostService {
   static async create(postData) {
     await this.delay();
     
-    const maxId = Math.max(...this.posts.map(p => p.Id), 0);
+const maxId = Math.max(...this.posts.map(p => p.Id), 0);
     const newPost = {
       Id: maxId + 1,
       id: `post_${maxId + 1}`,
@@ -39,20 +39,21 @@ export class PostService {
       score: postData.score || 1,
       userVote: postData.userVote || 1,
       timestamp: postData.timestamp,
-      commentCount: postData.commentCount || 0
+      commentCount: postData.commentCount || 0,
+      tags: postData.tags || []
     };
     
     this.posts.unshift(newPost);
     return { ...newPost };
   }
 
-  static async update(id, updateData) {
+static async update(id, updateData) {
     await this.delay();
     
     const index = this.posts.findIndex(p => p.Id === parseInt(id));
     if (index === -1) return null;
     
-    this.posts[index] = { ...this.posts[index], ...updateData };
+    this.posts[index] = { ...this.posts[index], ...updateData, tags: updateData.tags || this.posts[index].tags };
     return { ...this.posts[index] };
   }
 

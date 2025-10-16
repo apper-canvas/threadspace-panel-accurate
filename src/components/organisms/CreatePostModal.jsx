@@ -1,19 +1,21 @@
-import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
+import TagInput from "@/components/atoms/TagInput";
+import { CommunityService } from "@/services/api/communityService";
+import { PostService } from "@/services/api/postService";
+import { cn } from "@/utils/cn";
+import ApperIcon from "@/components/ApperIcon";
 import Button from "@/components/atoms/Button";
+import Select from "@/components/atoms/Select";
 import Input from "@/components/atoms/Input";
 import Textarea from "@/components/atoms/Textarea";
-import Select from "@/components/atoms/Select";
-import ApperIcon from "@/components/ApperIcon";
-import { PostService } from "@/services/api/postService";
-import { CommunityService } from "@/services/api/communityService";
-import { cn } from "@/utils/cn";
 
 const CreatePostModal = ({ isOpen, onClose }) => {
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     title: "",
     content: "",
-    community: ""
+    community: "",
+    tags: []
   });
   const [communities, setCommunities] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,7 +25,7 @@ const CreatePostModal = ({ isOpen, onClose }) => {
     if (isOpen) {
       loadCommunities();
       // Reset form when modal opens
-      setFormData({ title: "", content: "", community: "" });
+setFormData({ title: "", content: "", community: "", tags: [] });
       setErrors({});
     }
   }, [isOpen]);
@@ -59,7 +61,7 @@ const CreatePostModal = ({ isOpen, onClose }) => {
       newErrors.community = "Please select a community";
     }
     
-    setErrors(newErrors);
+setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -73,7 +75,7 @@ const CreatePostModal = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
     
     try {
-      const newPost = {
+const newPost = {
         title: formData.title.trim(),
         content: formData.content.trim(),
         community: formData.community,
@@ -81,7 +83,8 @@ const CreatePostModal = ({ isOpen, onClose }) => {
         timestamp: new Date().toISOString(),
         score: 1,
         userVote: 1,
-        commentCount: 0
+        commentCount: 0,
+        tags: formData.tags
       };
       
       await PostService.create(newPost);
@@ -111,7 +114,7 @@ const CreatePostModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
+return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -163,6 +166,13 @@ const CreatePostModal = ({ isOpen, onClose }) => {
               {formData.content.length}/10,000 characters
             </div>
           </div>
+          
+          <TagInput
+            label="Tags"
+            value={formData.tags}
+            onChange={(tags) => handleInputChange("tags", tags)}
+            placeholder="Add tags to improve discoverability..."
+          />
         </form>
         
         <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">

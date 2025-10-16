@@ -100,7 +100,7 @@ const PostFeed = ({ filter = "all", searchQuery = "", onCreatePost }) => {
   };
 
   // Filter posts based on search query
-  const filteredPosts = posts.filter(post => {
+const filteredPosts = posts.filter(post => {
     if (!searchQuery) return true;
     
     const query = searchQuery.toLowerCase();
@@ -108,7 +108,8 @@ const PostFeed = ({ filter = "all", searchQuery = "", onCreatePost }) => {
       post.title.toLowerCase().includes(query) ||
       post.content.toLowerCase().includes(query) ||
       post.community.toLowerCase().includes(query) ||
-      post.author.toLowerCase().includes(query)
+      post.author.toLowerCase().includes(query) ||
+      (post.tags && post.tags.some(tag => tag.toLowerCase().includes(query)))
     );
   });
 

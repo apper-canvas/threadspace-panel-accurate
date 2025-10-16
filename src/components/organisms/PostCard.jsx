@@ -25,7 +25,7 @@ const PostCard = ({ post, onVote }) => {
             <span>Posted by u/{post.author}</span>
             <span>•</span>
             <span>{timeAgo}</span>
-          </div>
+</div>
           
           <h2 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors duration-200">
             {post.title}
@@ -35,6 +35,18 @@ const PostCard = ({ post, onVote }) => {
             <p className="text-gray-700 mb-4 leading-relaxed line-clamp-3">
               {post.content}
             </p>
+          )}
+{post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3 overflow-x-auto pb-1">
+              {post.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-2 py-1 bg-primary text-white rounded-full text-xs font-medium whitespace-nowrap hover:bg-primary/90 transition-colors duration-200"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
           
           <div className="flex items-center gap-6 text-sm text-gray-500">
