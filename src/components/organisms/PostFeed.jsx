@@ -7,7 +7,7 @@ import Empty from "@/components/ui/Empty";
 import { PostService } from "@/services/api/postService";
 import { toast } from "react-toastify";
 
-const PostFeed = ({ filter = "all", searchQuery = "", onCreatePost }) => {
+const PostFeed = ({ filter = "all", searchQuery = "", onCreatePost, communityName }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -22,9 +22,11 @@ const PostFeed = ({ filter = "all", searchQuery = "", onCreatePost }) => {
       setLoading(true);
       setError("");
       
-      let fetchedPosts;
+let fetchedPosts;
       if (filter === "popular") {
         fetchedPosts = await PostService.getPopular();
+      } else if (filter && filter !== "all") {
+        fetchedPosts = await PostService.getByCommunity(filter);
       } else {
         fetchedPosts = await PostService.getAll();
       }
@@ -142,8 +144,8 @@ const filteredPosts = posts.filter(post => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-gray-900 capitalize">
-          {filter === "all" ? "Home Feed" : filter}
+<h2 className="text-2xl font-bold text-gray-900 capitalize">
+          {filter === "all" ? "Home Feed" : filter === "popular" ? "Popular" : `r/${filter}`}
           {searchQuery && (
             <span className="text-lg font-normal text-gray-600 ml-2">
               • Results for "{searchQuery}"

@@ -23,6 +23,13 @@ export class PostService {
       .filter(post => post.score >= 50)
       .sort((a, b) => b.score - a.score)
       .map(post => ({ ...post }));
+}
+
+  static async getByCommunity(communityName) {
+    await this.delay();
+    return [...this.posts]
+      .filter(post => post.community.toLowerCase() === communityName.toLowerCase())
+      .map(post => ({ ...post }));
   }
 
   static async create(postData) {

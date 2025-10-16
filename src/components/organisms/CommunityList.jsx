@@ -1,18 +1,19 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import ApperIcon from "@/components/ApperIcon";
-import Button from "@/components/atoms/Button";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
-import Empty from "@/components/ui/Empty";
 import { CommunityService } from "@/services/api/communityService";
 import { cn } from "@/utils/cn";
-
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import Empty from "@/components/ui/Empty";
+import Error from "@/components/ui/Error";
+import Communities from "@/components/pages/Communities";
+import Button from "@/components/atoms/Button";
 const CommunityList = () => {
+const navigate = useNavigate();
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   useEffect(() => {
     loadCommunities();
   }, []);
@@ -30,7 +31,12 @@ const CommunityList = () => {
     }
   };
 
-  const handleJoinCommunity = (communityName) => {
+const handleCommunityClick = (communityName) => {
+    navigate(`/community/${communityName}`);
+  };
+
+  const handleJoinCommunity = (e, communityName) => {
+    e.stopPropagation();
     toast.success(`Joined r/${communityName}! Welcome to the community.`);
   };
 
@@ -60,9 +66,10 @@ const CommunityList = () => {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {communities.map(community => (
-          <div
+<div
             key={community.id}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all duration-200 hover:shadow-md hover:border-gray-200"
+            onClick={() => handleCommunityClick(community.name)}
+            className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition-all duration-200 hover:shadow-md hover:border-gray-200 cursor-pointer"
           >
             <div className="flex items-start justify-between mb-4">
               <div
@@ -71,10 +78,10 @@ const CommunityList = () => {
               >
                 {community.name.charAt(0).toUpperCase()}
               </div>
-              <Button
+<Button
                 variant="secondary"
                 size="sm"
-                onClick={() => handleJoinCommunity(community.name)}
+                onClick={(e) => handleJoinCommunity(e, community.name)}
                 className="flex items-center gap-1"
               >
                 <ApperIcon name="Plus" size={14} />
@@ -90,10 +97,14 @@ const CommunityList = () => {
               {community.description}
             </p>
             
-            <div className="flex items-center gap-4 text-sm text-gray-500">
+<div className="flex items-center gap-4 text-sm text-gray-500">
               <div className="flex items-center gap-1">
                 <ApperIcon name="Users" size={14} />
-                <span>{community.memberCount.toLocaleString()} members</span>
+                <span>{community.memberCount || 0} members</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <ApperIcon name="MessageSquare" size={14} />
+                <span>{community.postCount || 0} posts</span>
               </div>
             </div>
           </div>
@@ -102,5 +113,7 @@ const CommunityList = () => {
     </div>
   );
 };
+
+export default CommunityList;
 
 export default CommunityList;

@@ -5,6 +5,7 @@ import Layout from "@/components/organisms/Layout";
 const Home = lazy(() => import("@/components/pages/Home"));
 const Popular = lazy(() => import("@/components/pages/Popular"));
 const Communities = lazy(() => import("@/components/pages/Communities"));
+const CommunityDetail = lazy(() => import("@/components/pages/CommunityDetail"));
 const UserProfile = lazy(() => import("@/components/pages/UserProfile"));
 const NotFound = lazy(() => import("@/components/pages/NotFound"));
 const mainRoutes = [
@@ -30,6 +31,14 @@ const mainRoutes = [
     element: (
       <Suspense fallback={<div>Loading.....</div>}>
         <Communities />
+      </Suspense>
+    )
+  },
+  {
+    path: "community/:communityName",
+    element: (
+      <Suspense fallback={<div>Loading.....</div>}>
+        <CommunityDetail />
       </Suspense>
     )
   },
