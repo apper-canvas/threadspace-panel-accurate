@@ -1,14 +1,21 @@
 import { useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/layouts/Root';
+import { useSelector } from 'react-redux';
 
 function Login() {
   const { isInitialized } = useAuth();
-  
+  const { user } = useSelector(state => state.user);
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (isInitialized) {
       const { ApperUI } = window.ApperSDK;
-      ApperUI.showLogin("#authentication-login");
+      if (!user) {
+        ApperUI.showSignup("#authentication");
+      } else {
+        navigate("/");
+      }
     }
   }, [isInitialized]);
   
