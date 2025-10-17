@@ -12,7 +12,7 @@ function Login() {
     if (isInitialized) {
       const { ApperUI } = window.ApperSDK;
       if (!user) {
-        ApperUI.showSignup("#authentication");
+        ApperUI.showLogin("#authentication");
       } else {
         navigate("/");
       }
